@@ -1,0 +1,188 @@
+
+body {
+  width: 850px;
+  height: 100vh;
+ 
+  
+}
+.tea-container{
+  border-radius: 10px;
+  border: 1px solid #dee2e6;
+  margin-left: 10px;
+  padding-top: 5px;
+  padding-bottom: 5px;
+}
+button{
+  background-color: #04AA6D;
+  border: none;
+  color: white;
+  padding: 16px 32px;
+  text-decoration: none;
+  margin: 4px 4px;
+  cursor: pointer;
+ 
+}
+input{
+  width: 100%;
+  padding: 12px 20px;
+  margin: 8px;
+  box-sizing: border-box;
+  border-radius: 10px;
+  border:1px solid #dee2e6;
+
+}
+.progressContainer {
+  width: 300px;
+  height: 20px;
+  background-color: #f0f0f0;
+  border-radius: 10px;
+  margin-bottom: 20px;
+}
+
+.progressBar {
+  height: 100%;
+  background-color: #4caf50;
+  border-radius: 10px;
+  transition: width 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+}
+a{
+  cursor: pointer;
+}
+/* src/App.css */
+.light-theme {
+  background-color: #fff;
+  color: #000;
+}
+
+.dark-theme {
+  background-color: #333;
+  color: #fff;
+}
+
+.btn-dark, .btn-light {
+  margin: 5px;
+}
+/* Default styles for light theme */
+.option-item {
+  background-color: #fff;
+  color: #000;
+  /* ... other styles ... */
+}
+
+/* Override styles for dark theme */
+.dark-theme .option-item {
+  background-color: #333;
+  color: #fff;
+  /* ... other styles ... */
+}
+
+/* You might also want to adjust the modal background and text colors specifically */
+.dark-theme .modal-content {
+  background-color: #424242;
+  color: #e0e0e0;
+}
+
+/* Ensure that the "DEFAULT" badge is also visible in dark mode */
+.dark-theme .option-default-badge {
+  background-color: #007bff; /* Or any color that stands out on dark background */
+  color: #fff;
+}
+.options-container {
+  /* Add your styles for the container */
+}
+
+.option-item {
+  padding: 10px;
+  border: 1px solid #ddd;
+  margin-bottom: 5px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.option-content {
+  /* Style for the content area */
+}
+
+.option-header {
+  font-weight: bold;
+  /* Your styles for the header */
+}
+
+.option-description {
+  /* Your styles for the description */
+}
+
+.option-selected {
+  border-color: #007bff;
+  background-color: #e7f3ff;
+}
+
+.option-default-badge {
+  background-color: #007bff;
+  color: white;
+  padding: 5px 10px;
+  border-radius: 5px;
+  /* Other styles to make it look like a badge */
+}
+/* Assuming your app has a class .dark-theme applied to the body when dark mode is enabled */
+.dark-theme ul {
+  background-color: black;
+  color: white;
+}
+.dark-theme li{
+  
+  color: white;
+}
+.dark-theme span{
+  
+  color: white;
+}
+.dark-theme li:hover{
+  background-color: rgb(233, 172, 172)!important;
+  color: black!important;
+}
+
+
+
+/* ckeditor-dark-theme.css */
+.ck.ck-editor__editable {
+  background-color: #333;
+  color: #ccc;
+}
+
+.ck.ck-content {
+  background-color: #333;
+  color: black;
+}
+
+.ck.ck-editor__editable a {
+  color: #88c0d0; /* Light blue color for links to stand out */
+}
+.dark-theme .ck.ck-editor__main>.ck-editor__editable{
+  background-color: #333;
+  color: white!important;
+}
+
+#imageToggle{
+  cursor: pointer;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+

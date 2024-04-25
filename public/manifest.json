@@ -1,0 +1,22 @@
+{
+  "manifest_version": 3,
+  "name": "Auto Blogging AI - Ai Blogging, Ai Content Generation",
+  "version": "1.0",
+  "description": "With Auto Blogging AI Extension, You can generate Unlimited SEO optimized Ai Articles. It will be the best AI tool for blogging and content generation.",
+  "action": {
+    "default_popup": "index.html",
+    "default_icon": {
+      "16": "openai.png",
+      "48": "openai.png",
+      "128": "openai.png"
+    }
+  },
+  "host_permissions": [
+    "https://api.openai.com/*",
+    "https://gimage-scarping.onrender.com/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  }
+}
+
