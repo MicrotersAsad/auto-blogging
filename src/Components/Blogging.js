@@ -476,7 +476,7 @@ const handleEditorDataLoad = (data) => {
 
 
 
-    const faqprompt=`Ignore all previous instructions. Always begin with an h2 HTML snippet heading. Write 5 Questions and Answers on "{keyword} with proper system and heading" 
+    const faqprompt=`Ignore all previous instructions. Always begin with an h2 HTML snippet heading. Write 5 Questions and Answers on "${keyword} with proper system and heading" 
 
 
     """
@@ -598,19 +598,11 @@ const handleEditorDataLoad = (data) => {
   };
 
 
-
   const generateArticle = async () => {
-    setIsLoading(true);
-  
-    // Declare loadingTimeout within the scope of generateArticle function
-    let loadingTimeout;
-  
-    // Set a timeout to stop loading after one minute
-    loadingTimeout = setTimeout(() => {
-      setIsLoading(false);
-    }, 60000); // 60 seconds = 1 minute
+    setIsLoading(true);  // Start loading
   
     try {
+      // Await image generation if needed
       if (generateImages) {
         await fetchImageUrls();
       }
@@ -624,7 +616,7 @@ const handleEditorDataLoad = (data) => {
       ];
       const generatedContent = await Promise.all(contentPromises);
   
-      // Check if all content is generated successfully
+      // Check and combine generated content
       if (generatedContent.every(content => content !== undefined)) {
         combineGeneratedContent(generatedContent);
       } else {
@@ -634,13 +626,13 @@ const handleEditorDataLoad = (data) => {
       console.error('Error generating article:', error);
       alert(`Failed to generate article: ${error.message}`);
     } finally {
-      // Clear the loading timeout and stop loading
-      clearTimeout(loadingTimeout);
+      // Stop loading only after all operations are complete
       setIsLoading(false);
-      setIsCKEditorReady(true)
+      setIsCKEditorReady(true);
     }
   };
-
+  
+  
   
  // Helper function to combine all generated content
  const combineGeneratedContent = (generatedContent) => {
@@ -654,6 +646,7 @@ const handleEditorDataLoad = (data) => {
 
 
   const combinedContent = `${introduction}\n${imageTags}\n${quickAnswer}\n${body}\n${faq}`;
+
  
   setCombinedGeneratedContent(combinedContent);
   console.log(combinedContent);

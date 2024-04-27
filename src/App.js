@@ -8,7 +8,9 @@ import sun from "./assest/sunny.png"
 import moon from "./assest/half-moon.png"
 import icon from "./assest/messenger.png"
 import 'bootstrap/dist/js/bootstrap.bundle.min';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
+const queryClient = new QueryClient();
 
 function App() {
   const { theme, setLightTheme, setDarkTheme } = useTheme();
@@ -32,7 +34,9 @@ function App() {
       </button>
   </div>
      <div className='ps-4 pe-4 pt-3 pb-5'>
-     <Blogging />
+     <QueryClientProvider client={queryClient}>
+      <Blogging />
+    </QueryClientProvider>
      </div>
     </div>
   );
