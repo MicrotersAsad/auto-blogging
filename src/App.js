@@ -9,6 +9,7 @@ import moon from "./assest/half-moon.png"
 import icon from "./assest/messenger.png"
 import 'bootstrap/dist/js/bootstrap.bundle.min';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import AIBlog from './Components/AIBlog';
 
 const queryClient = new QueryClient();
 
@@ -35,7 +36,7 @@ function App() {
   </div>
      <div className='ps-4 pe-4 pt-3 pb-5'>
      <QueryClientProvider client={queryClient}>
-      <Blogging />
+     <AIBlog/>
     </QueryClientProvider>
      </div>
     </div>

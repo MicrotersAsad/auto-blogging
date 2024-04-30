@@ -30,10 +30,15 @@ const Blogging = () => {
   const [language, setLanguage] = useState('');
   const [word, setWord] = useState('');
   const [key, setKey] = useState('');
+  const [outline,setOutline]=useState('')
   const [generate1, setGenerate1] = useState('');
   const [generate2, setGenerate2] = useState('');
   const [generate3, setGenerate3] = useState('');
   const [generate4, setGenerate4] = useState('');
+  const [generate5, setGenerate5] = useState('');
+  const [body2, setBody2] = useState('');
+  const [body3, setBody3] = useState('');
+  const [keyTak, setKeyTak] = useState('');
   const [editorLoading, setEditorLoading] = useState(true);
   const [loadingTimeExpired, setLoadingTimeExpired] = useState(false);
 // Inside your component function
@@ -89,21 +94,9 @@ const [generatedKey, setGeneratedKey] = useState('');
     alert('Key saved successfully')
   
   };
-  // Function to set loading time expiration
-const setLoadingTimeExpiration = () => {
-  setTimeout(() => {
-    setLoadingTimeExpired(true);
-  }, 60000); // 1 minute in milliseconds
-};
 
-// Function to handle CKEditor data loading
-const handleEditorDataLoad = (data) => {
-  // Check if data is not empty or null
-  if (data) {
-    setCombinedGeneratedContent(data);
-    setEditorLoading(false); // Set loading state to false when data is loaded
-  }
-};
+
+
   const fetchImageUrls = async () => {
     setIsLoading(true);
     try {
@@ -134,38 +127,20 @@ const handleEditorDataLoad = (data) => {
     } catch (error) {
       console.error('Error fetching image URLs:', error);
       alert(`Failed to fetch images: ${error.toString()}`);
-    } finally {
-      setIsLoading(false);
-    }
+    } 
   };
-
-  const generateIntroduction = async () => {
-   
+  const generateOutline = async () => {
     setIsLoading(true);
-    const introductionPrompt=`"Ignore all previous instructions. Write two short paragraphs about ${keyword}. Generate Each paragraph within 3-4 lines max. The writing should mimic a natural, human style, featuring a mix of paragraph lengths.
-    Some paragraphs should contain 3 sentences, while others have just 2 sentences ensuring variety in the presentation. 
-   
-    1) Point Of View: ${pov}.
-    2) Writing Tone:${tone}. 
-    
-    Write an introduction maintaining coherency among the lines and even paragraphs.
-    
-    In the first paragraph, Start with a compelling hook that could be a surprising fact, a thought-provoking question, a brief anecdote, or a relevant statistic related to the topic. of {keyword}. Be creative in your approach but avoid starting with the phrase 'Did you.'
-    
-    In the second paragraph, integrate the most significant aspects of {keyword}. This should include a blend of history or background, and a compelling statistic or relatable solution associated with {keyword}. Avoid using headings and refrain from adding a conclusion or summary at the end."
-    "
-    -  All text should be in "${language}" language.
-      
-    Most Important: Format the content with the appropriate HTML comments that denote blocks. 
-    
-    For example, a paragraph block is represented as:
-    
-    <!-- wp:paragraph -->
-    <p>This is a paragraph</p>
-    <!-- /wp:paragraph -->`;
+    const introductionPrompt = `Act as a professional writer and `;
   
-
-
+    // This is the setup where the system prompts the assistant to generate content based on the keyword.
+    const messages = [
+      {"role": "system", "content": "Act as a professional writer"},
+      {"role": "user", "content": `write an introduction for the topic: this topic'. Then, the assistant will add its commentary on the topic.`},
+      // Dynamically generate assistant's contribution based on the keyword or discussion.
+   
+    ];
+  
     try {
       const response = await fetch("https://api.openai.com/v1/chat/completions", {
         method: 'POST',
@@ -175,85 +150,96 @@ const handleEditorDataLoad = (data) => {
         },
         body: JSON.stringify({
           model: defaultOptionKey,
-        messages: [
-                        {
-                            "role": "system",
-                            "content": `${introductionPrompt}`
-                        },
-                        {
-                            "role": "user",
-                            "content": `${keyword},${tone},${pov},${language}`
-                        }
-                    ],
-          temperature: 1,
+          messages: messages,
+          temperature: 0.7, // Adjust for more creative or factual responses
           max_tokens: parseInt(word, 10),
           top_p: 1,
           frequency_penalty: 0,
           presence_penalty: 0,
         })
       });
-
+  
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
-
+  
       const data = await response.json();
-
+  
       if (data.choices && data.choices.length > 0 && data.choices[0].message.content) {
         const generatedHtml = data.choices[0].message.content.trim();
-        setGenerate1(generatedHtml);
+        setOutline(generatedHtml);
         setIsCKEditorReady(true);
-        setIsLoading(false);
-
-        return generatedHtml
+        setIsLoading(false); // Ensure loading is stopped when data is successfully fetched and processed
+  
+        return generatedHtml;
       } else {
         throw new Error('Failed to generate text. No data returned.');
       }
     } catch (error) {
       console.error('Error in generating content:', error);
       alert(`Failed to generate content: ${error.message}`);
-    } finally {
-      setIsLoading(false);
+      setIsLoading(false); // Stop loading on error
     }
   };
+  
+  const generateIntroduction = async () => {
+    setIsLoading(true);
+   
+  
+    // This is the setup where the system prompts the assistant to generate content based on the keyword.
+    const messages = [
+     
+      {"role": "assistant", "content": outline},
+      {"role": "user", "content": `write an introduction for the topic:${keyword} this topic'. Then, the assistant will add its commentary on the topic.`},
+      // Dynamically generate assistant's contribution based on the keyword or discussion.
+   
+    ];
+  
+    try {
+      const response = await fetch("https://api.openai.com/v1/chat/completions", {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${openaiKey}`
+        },
+        body: JSON.stringify({
+          model: defaultOptionKey,
+          messages: messages,
+          temperature: 0.7, // Adjust for more creative or factual responses
+          max_tokens: parseInt(word, 10),
+          top_p: 1,
+          frequency_penalty: 0,
+          presence_penalty: 0,
+        })
+      });
+  
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+  
+      const data = await response.json();
+  
+      if (data.choices && data.choices.length > 0 && data.choices[0].message.content) {
+        const generatedHtml = data.choices[0].message.content.trim();
+        setGenerate1(generatedHtml);
+        setIsCKEditorReady(true);
+        setIsLoading(false); // Ensure loading is stopped when data is successfully fetched and processed
+  
+        return generatedHtml;
+      } else {
+        throw new Error('Failed to generate text. No data returned.');
+      }
+    } catch (error) {
+      console.error('Error in generating content:', error);
+      alert(`Failed to generate content: ${error.message}`);
+      setIsLoading(false); // Stop loading on error
+    }
+  };
+  
   const generateQuick = async () => {
     setIsLoading(true);
-    const quickAnswerPrompt = `
-    <h6>Quick Answer</h6>: gnore all previous instructions.
-    """
-    Focus Keyword: "${keyword}"
-    Point Of View: ${pov}
-    Writing Tone: ${tone}
-    
-    Please follow the instructions Which are delimited by triple quotes For writing:
-    """ 
-    For the keyword "${keyword}", craft a feature-optimized answer tailored for Google search results, ensuring it's between 50-70 words. Wrap this content using the HTML <div> tag with a class named "featured." Here are specific directives based on the keyword type:
-    
-    - If the keyword starts with "How To," provide a step-by-step guide. Use HTML list items for each step and wrap the entire tutorial in the <strong> tag.
-    - If the keyword contains "vs," word then write and compare 5 features with each product with an HTML comparison table. Do not add any heading
-    
-    Important: Do not include the exact "${keyword}" within the content.
-    """
-  
-    Always follow These Rules for Every Content Piece:
-    
-    1. Engaging Writing Style: Your writing should be both fun and engaging, captivating readers' attention and keeping them invested in the content.
-      
-    2. SEO Expertise: Ensure that your content is optimized for search engines. The objective is to achieve a high ranking on Google.
-      
-    3. Originality and Research: Never plagiarize. Instead, use online content to gain insights and knowledge. Once you've gathered information, craft a unique piece that showcases your distinct writing flair.
-    """
-    All text should be in "${language}".
-    
-    Most Important: Format the content with the appropriate HTML comments that denote blocks. 
-    
-    For example, an HTML block is represented as:
-    
-    <!-- wp:html -->
-    <div class="featured">
-    <p>[Your 50-70 word content here]</p>
-    </div>
-    <!-- /wp:html -->`;
+    const quickAnswerPrompt = `${generate1},now write 3 <h2> <h2/> heading and  write 2 <h3> <h3/>  heading under
+     <h2> headings. each h2 heading write 3 paragraph <p> </p> and each h3 heading write 2 paragraph.`;
   
 
 
@@ -266,16 +252,13 @@ const handleEditorDataLoad = (data) => {
         },
         body: JSON.stringify({
           model: defaultOptionKey,
-        messages: [
-                        {
-                            "role": "system",
-                            "content": `${quickAnswerPrompt}`
-                        },
-                        {
-                            "role": "user",
-                            "content": `${keyword},${tone},${pov},${language}`
-                        }
-                    ],
+         messages : [
+        
+          {"role": "assistant", "content": generate1},
+          {"role": "user", "content": keyword},
+          {"role": "user", "content": 'now write 3 <h2> <h2/> heading and  write 2 <h3> <h3/>  heading under <h2> headings. each h2 heading write 3 paragraph <p> </p> and each h3 heading write 2 paragraph for this topic'},
+         
+          ],
           temperature: 1,
           max_tokens: parseInt(word, 10),
           top_p: 1,
@@ -293,8 +276,8 @@ const handleEditorDataLoad = (data) => {
       if (data.choices && data.choices.length > 0 && data.choices[0].message.content) {
         const generatedHtml = data.choices[0].message.content.trim();
         setGenerate2(generatedHtml);
-        setIsCKEditorReady(true);
-        setIsLoading(false);
+        setIsCKEditorReady(false);
+        
         return generatedHtml
       } else {
         throw new Error('Failed to generate text. No data returned.');
@@ -302,22 +285,12 @@ const handleEditorDataLoad = (data) => {
     } catch (error) {
       console.error('Error in generating content:', error);
       alert(`Failed to generate content: ${error.message}`);
-    } finally {
-      setIsLoading(false);
-    }
+    } 
   };
   const generateBody = async () => {
    
     setIsLoading(true);
-    const bodyPrompt = `
-    total word:${word}
-    Ignore all previous instructions. Create a Long, Expert-level, informative, engaging, and reader-friendly article body on '${keyword}'. - Using HTML format. End the article with 1 relevant paragraph without a formal conclusion heading. 
-    
-    First, please follow the instructions Which are delimited by triple quotes For writing this article. 
-    """
-    
-    """
-    Must Begin with an H2 heading with an intro, covering a unique aspect of '${keyword}'. Do not Start with this heading:  '${keyword}'. Must Include 4 To 5 sub-headings (H3 and H4), and integrate lists or tables if relevant. 
+    const bodyPrompt = `Must Begin with an H2 heading with an intro, covering a unique aspect of this topic'. Do not Start with this heading:  this topic'. Must Include 4 To 5 sub-headings (H3 and H4), and integrate lists or tables if relevant. 
     
     Write Each H3 heading in 4 paragraphs with detailed information. Write Each H4 heading in 3 paragraphs with detailed information.
     """
@@ -325,7 +298,7 @@ const handleEditorDataLoad = (data) => {
     Then, 2nd, Please follow the below instructions Which are delimited by triple quotes For writing this article.  Maintain the previous writing flow...
     
     """
-    Again, Start with a new H2 heading with intro, exploring a different dimension of '${keyword}'.  Then, include 4 To 5 sub-headings (H3 and H4), with lists or tables as needed.
+    Again, Start with a new H2 heading with intro, exploring a different dimension of this topic'.  Then, include 4 To 5 sub-headings (H3 and H4), with lists or tables as needed.
     
     Write Each H3 heading in 4 paragraphs with detailed information. Write Each H4 heading in 3 paragraphs with detailed information.
     """
@@ -333,7 +306,7 @@ const handleEditorDataLoad = (data) => {
     End the article with 1 relevant paragraph without a formal conclusion heading. 
     """
     2. Keyword Usage:
-       - Use '${keyword}' 3-5 times.
+       - Use this topic' 3-5 times.
        - Include related secondary keywords for SEO.
     3. Readability:
        - Target an 8th-grade USA reader.
@@ -354,70 +327,7 @@ const handleEditorDataLoad = (data) => {
     - Use appropriate HTML comments for content blocks (e.g., paragraphs, headings, lists, tables).
     - Maintain coherence and logical flow.
     - Ensure originality and factual accuracy.
-    
-    Note: The article should not have a formal conclusion section or introductory phrases that do not add value to the main content. Focus on maintaining coherence, originality, and factual accuracy throughout.
-    ###
-    
-    Most Important: Format the content with the appropriate HTML comments that denote blocks. 
-    
-    For example, a paragraph block is represented as:
-    
-    <!-- wp:paragraph -->
-    <p>This is a paragraph</p>
-    <!-- /wp:paragraph -->
-    
-    A Heading block is represented as:
-    
-    <!-- wp:heading {"level":2} -->
-    <h2 class="wp-block-heading">This is a h2 heading</h2>
-    <!-- /wp:heading -->
-    
-    <!-- wp:heading {"level":3} -->
-    <h3 class="wp-block-heading">This is a h3 heading</h2>
-    <!-- /wp:heading -->
-    
-    <!-- wp:heading {"level":4} -->
-    <h4 class="wp-block-heading">This is a h4 heading</h2>
-    <!-- /wp:heading -->
-    
-    <!-- wp:heading {"level":3} -->
-    <h3 class="wp-block-heading">This is a h3 heading</h2>
-    <!-- /wp:heading -->
-    
-    A list item is represented as:
-    
-    <!-- wp:list -->
-    <ul><!-- wp:list-item -->
-    <li>This is ul list</li>
-    <!-- /wp:list-item -->
-    
-    <!-- wp:list-item -->
-    <li>This is ul list</li>
-    <!-- /wp:list-item -->
-    
-    <!-- wp:list-item -->
-    <li>This is ul lis</li>
-    <!-- /wp:list-item --></ul>
-    <!-- /wp:list -->
-    
-    A table item is represented as:
-    
-    <!-- wp:table -->
-    <table class="wp-block-table"><tbody>
-    <tr>
-        <td>Header 1</td>
-        <td>Header 2</td>
-    </tr>
-    <tr>
-        <td>Row 1, Column 1</td>
-        <td>Row 1, Column 2</td>
-    </tr>
-    <tr>
-        <td>Row 2, Column 1</td>
-        <td>Row 2, Column 2</td>
-    </tr>
-    </tbody></table>
-    <!-- /wp:table -->`;
+    `;
   
 
 
@@ -430,16 +340,16 @@ const handleEditorDataLoad = (data) => {
         },
         body: JSON.stringify({
           model: defaultOptionKey,
-        messages: [
-                        {
-                            "role": "system",
-                            "content": `${bodyPrompt}`
-                        },
-                        {
-                            "role": "user",
-                            "content": `${keyword},${tone},${pov},${language}`
-                        }
-                    ],
+          messages : [
+          
+           
+           
+            {"role": "assistant", "content": generate2},
+            {"role": "user", "content": keyword},
+            {"role": "user", "content": `${bodyPrompt}`},
+            // Dynamically generate assistant's contribution based on the keyword or discussion.
+           
+          ],
           temperature: 1,
           max_tokens: parseInt(word, 10),
           top_p: 1,
@@ -457,8 +367,8 @@ const handleEditorDataLoad = (data) => {
       if (data.choices && data.choices.length > 0 && data.choices[0].message.content) {
         const generatedHtml = data.choices[0].message.content.trim();
         setGenerate3(generatedHtml);
-        setIsCKEditorReady(true);
-        setIsLoading(false);
+        setIsCKEditorReady(false);
+       
         return generatedHtml
       } else {
         throw new Error('Failed to generate text. No data returned.');
@@ -466,32 +376,19 @@ const handleEditorDataLoad = (data) => {
     } catch (error) {
       console.error('Error in generating content:', error);
       alert(`Failed to generate content: ${error.message}`);
-    } finally {
-      setIsLoading(false);
-    }
+    } 
   };
+
   const generateFaq = async () => {
     setIsLoading(true);
 
 
 
 
-    const faqprompt=`Ignore all previous instructions. Always begin with an h2 HTML snippet heading. Write 5 Questions and Answers on "${keyword} with proper system and heading" 
-
-
-    """
-    - Focus Keyword:  "${keyword}"
-    - Point Of View:${pov} 
-    - Writing Tone: ${tone} 
-    
-    Please follow the instructions Which are delimited by triple quotes For writing:
-    
-    """
-    #Main Objective: 
-    Write 5 engaging Questions and Answers related to the focus keyword "{keyword}". Structure the content using HTML tags, beginning with an '<h2>' heading titled "Frequently Asked Questions". This should be followed by each question framed with an '<h3>' HTML tag. Every answer should span two paragraphs. Do not include the specific question "{keyword}" in your list. Do not any word before the number.
+    const faqprompt=`Write 5 engaging Questions and Answers related to the focus keyword". Structure the content using HTML tags, beginning with an '<h2>' heading titled "Frequently Asked Questions". This should be followed by each question framed with an '<h3>' HTML tag. Every answer should span two paragraphs. Do not include the specific question "{keyword}" in your list. Do not any word before the number.
     
     #Structure:
-    - Start with an '<h2>' heading: "Frequently Asked Questions"  and Translate this heading in "${language}" Language.
+    - Start with an '<h2>' heading: "Frequently Asked Questions"  and Translate this heading in  Language.
     - Follow this with a brief, two-line introduction related to the topic.
     - For each question, use the '<h3>' HTML tag. and Add Numbered for each question. Do not any word before the number.
     - Each answer should be divided into two paragraphs.
@@ -509,41 +406,7 @@ const handleEditorDataLoad = (data) => {
     1. Simplicity is Paramount: Write content that an 8th-grade student could easily comprehend. Use straightforward language and steer clear of technical jargon or intricate terms.
     2. Brevity in Sentences: Ensure every sentence is capped at 15 words. This maintains readability and ensures the content appeals to a broad audience.
     3. Break Down Complexity: If a topic is multifaceted, simplify it. Imagine explaining a topic to a young teen; it should be that clear.
-    
-    """
-    All text should be in "${language}".
-    
-    Most Important: Format the content with the appropriate HTML comments that denote blocks. 
-    
-    For example, a paragraph block is represented as:
-    
-    <!-- wp:paragraph -->
-    <p>This is a paragraph</p>
-    <!-- /wp:paragraph -->
-    
-    A Heading block is represented as:
-    
-    <!-- wp:heading {"level":2} -->
-    <h2 class="wp-block-heading">This is a h2 heading</h2>
-    <!-- /wp:heading -->
-    
-    <!-- wp:heading {"level":3} -->
-    <h3 class="wp-block-heading">This is a h3 heading</h2>
-    <!-- /wp:heading -->
-    
-    <!-- wp:heading {"level":4} -->
-    <h4 class="wp-block-heading">This is a h4 heading</h2>
-    <!-- /wp:heading -->
-    
-    <!-- wp:heading {"level":3} -->
-    <h3 class="wp-block-heading">This is a h3 heading</h2>
-    <!-- /wp:heading -->
-    
-    - Focus Keyword:  "${keyword}"
-    
-    - Point Of View: ${pov} 
-    - Writing Tone: ${tone}
-    - Language: ${language}`
+    `
    
 
     try {
@@ -556,16 +419,13 @@ const handleEditorDataLoad = (data) => {
         body: JSON.stringify({
          
           model: defaultOptionKey,
-        messages: [
-                        {
-                            "role": "system",
-                            "content": `${faqprompt}`
-                        },
-                        {
-                            "role": "user",
-                            "content": `${keyword},${tone},${pov},${language}`
-                        }
-                    ],
+          messages : [
+          
+            {"role": "assistant", "content": generate3},
+            {"role": "user", "content": keyword},
+            {"role": "user", "content": faqprompt},
+            
+            ],
           temperature: 1,
           max_tokens: parseInt(word, 10),
           top_p: 1,
@@ -584,7 +444,7 @@ const handleEditorDataLoad = (data) => {
         const generatedHtml = data.choices[0].message.content.trim();
         setGenerate4(generatedHtml);
         setIsCKEditorReady(true);
-        setIsLoading(false);
+        
         return generatedHtml
       } else {
         throw new Error('Failed to generate text. No data returned.');
@@ -592,33 +452,87 @@ const handleEditorDataLoad = (data) => {
     } catch (error) {
       console.error('Error in generating content:', error);
       alert(`Failed to generate content: ${error.message}`);
-    } finally {
-      setIsLoading(false);
+    } 
+  };
+  const generateConclusion = async () => {
+    setIsLoading(true);
+    const Conclusion= `Write a Conclusion For this Topic 1 paragraph miimum 100 word 500 charcter `;
+  
+    // This is the setup where the system prompts the assistant to generate content based on the keyword.
+    const messages = [
+      {"role": "system", "content": "Act as a professional writer"},
+      {"role": "user", "content": keyword},
+      {"role": "user", "content": `${Conclusion}`},
+      // Dynamically generate assistant's contribution based on the keyword or discussion.
+   
+    ];
+  
+    try {
+      const response = await fetch("https://api.openai.com/v1/chat/completions", {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${openaiKey}`
+        },
+        body: JSON.stringify({
+          model: defaultOptionKey,
+          messages: messages,
+          temperature: 0.7, // Adjust for more creative or factual responses
+          max_tokens: parseInt(word, 10),
+          top_p: 1,
+          frequency_penalty: 0,
+          presence_penalty: 0,
+        })
+      });
+  
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+  
+      const data = await response.json();
+  
+      if (data.choices && data.choices.length > 0 && data.choices[0].message.content) {
+        const generatedHtml = data.choices[0].message.content.trim();
+        setGenerate5(generatedHtml);
+        setIsCKEditorReady(true);
+        setIsLoading(false); // Ensure loading is stopped when data is successfully fetched and processed
+  
+        return generatedHtml;
+      } else {
+        throw new Error('Failed to generate text. No data returned.');
+      }
+    } catch (error) {
+      console.error('Error in generating content:', error);
+      alert(`Failed to generate content: ${error.message}`);
+      setIsLoading(false); // Stop loading on error
     }
   };
-
 
   const generateArticle = async () => {
     setIsLoading(true);  // Start loading
   
     try {
-      // Await image generation if needed
-      if (generateImages) {
-        await fetchImageUrls();
-      }
-  
       // Generate content concurrently
       const contentPromises = [
         generateIntroduction(), 
         generateQuick(), 
         generateBody(), 
-        generateFaq()
+        generateFaq(),
+        generateConclusion()
       ];
       const generatedContent = await Promise.all(contentPromises);
   
-      // Check and combine generated content
+      // Await image generation if needed
+      if (generateImages) {
+        await fetchImageUrls();
+      }
+  
+      // Check if all content is generated successfully
       if (generatedContent.every(content => content !== undefined)) {
-        combineGeneratedContent(generatedContent);
+        // Prepare image tags
+        const imageTags = imageUrls.map((url, index) => `<img src="${url}" alt="Image ${index + 1}" />`).join('\n');
+        console.log(imageTags);
+        combineGeneratedContent(generatedContent, imageTags);
       } else {
         console.log('Not all content has been generated successfully.');
       }
@@ -626,32 +540,33 @@ const handleEditorDataLoad = (data) => {
       console.error('Error generating article:', error);
       alert(`Failed to generate article: ${error.message}`);
     } finally {
-      // Stop loading only after all operations are complete
-      setIsLoading(false);
-      setIsCKEditorReady(true);
+      // Finally block should not set isLoading to false yet, move it to combineGeneratedContent
     }
   };
   
+  // Helper function to combine all generated content and set it
+  const combineGeneratedContent = (generatedContent, imageTags) => {
+    const [introduction, quickAnswer, body, faq,conculation] = generatedContent;
+    const combinedContent = `${introduction}n/${quickAnswer}n/${body}n/${faq}n/${conculation}`;
+    console.log(`Combined Content: ${combinedContent}`);
   
+    // Set the combined content in your state
+    setCombinedGeneratedContent(combinedContent);
   
- // Helper function to combine all generated content
- const combineGeneratedContent = (generatedContent) => {
-    const  imageTags = imageUrls.map((url, index) => `<img src="${url}" alt="Image ${index + 1}" />`).join('\n');
-  console.log(imageTags);
-  const [introduction, quickAnswer, body, faq] = generatedContent;
-  console.log(introduction);
-  console.log(quickAnswer);
-  console.log(body);
-  console.log(faq);
-
-
-  const combinedContent = `${introduction}\n${imageTags}\n${quickAnswer}\n${body}\n${faq}`;
-
- 
-  setCombinedGeneratedContent(combinedContent);
-  console.log(combinedContent);
-  setIsCKEditorReady(true);
-};
+    // Now that content is combined and ready, set the editor as ready
+    setIsCKEditorReady(true);
+  
+    // Stop loading only after all operations including image fetching and combining content are complete
+    setIsLoading(false);
+  };
+  
+  console.log(`Intro: ${generate1}`);
+  console.log(`Quick: ${generate2}`);
+  console.log(`Body: ${generate3}`);
+  // // console.log(`Body: ${generate3}`);
+  console.log(`FAQ: ${generate4}`);
+  console.log(`Conclution: ${generate5}`);
+  
 // Function to download content as HTML
 const downloadAsHtml = () => {
   const htmlContent = combinedGeneratedContent; // Change generateContent to generatedContent
